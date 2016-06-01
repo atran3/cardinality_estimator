@@ -11,7 +11,7 @@ double runTest(size_t buckets, size_t numElements) {
   E estimator(buckets);
   std::default_random_engine engine;
   engine.seed(kRandomSeed);
-  auto gen = std::uniform_int_distribution<int>(0, UINT_MAX);
+  auto gen = std::uniform_int_distribution<size_t>(0, UINT_MAX);
 
   for (size_t i = 0; i < numElements; ++i) {
     size_t val = gen(engine);

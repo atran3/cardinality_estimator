@@ -2,6 +2,7 @@
 #define HyperLogLog_Included
 
 #include "stdlib.h"
+#include <functional>
 
 class HyperLogLogEstimator {
 public:
@@ -12,6 +13,10 @@ public:
   double estimate();
 
 private:
+  char *buckets;
+  size_t numBuckets;
+  size_t k;
+  std::hash<size_t> h;
 };
 
 #endif

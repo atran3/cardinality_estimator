@@ -1,6 +1,7 @@
 #include "LogLogEstimator.h"
 #include <math.h>
 #include <strings.h>
+#include <iostream>
 
 LogLogEstimator::LogLogEstimator(size_t numBuckets) {
   this->numBuckets = numBuckets;
@@ -15,24 +16,31 @@ LogLogEstimator::~LogLogEstimator() {
 }
 
 void LogLogEstimator::read(size_t elem) {
-  size_t hash = elem & 0x7;
-  size_t index = ffs(elem >> 7);
+  // Hard coded 32 bits for size_t
+  size_t index = elem & ((1 << k) - 1);
+  size_t val = ffs(elem >> k);
   
-  if (index > 0 && index < 6)
-    buckets[hash] |= 1 << (index-1);
+  if (val == 0)
+    return;
+
+  // 5 bit limit
+  val = (val-1) & 31;
+
+  if (val > buckets[index]) {
+    buckets[index] = val;
+  }
 }
 
 double LogLogEstimator::estimate() {
   double mean = 0.0;
   for (size_t i = 0; i < numBuckets; ++i) {
-    size_t r = 0;
-    while (buckets[i] >>= 1) {
-      r++;
-    }
-
-    mean += r;
+    mean += buckets[i];
   }
+
   mean /= numBuckets;
 
-  return numBuckets * pow(2.0, mean);
+  double temp = tgamma(-1.0/numBuckets) * (pow(2, -1.0/numBuckets) -1.0) / (log(2));
+  double constant = pow(temp, -1 * (int)numBuckets);
+
+  return constant * numBuckets * pow(2.0, mean);
 }

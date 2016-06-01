@@ -7,7 +7,7 @@
 #include "RoughEstimator.h"
 
 int main() {
-  std::cout << "Practice Test with PCSA Estimator..." << std::endl;
+  std::cout << "Practice Test..." << std::endl;
   double estimate = runTest<LogLogEstimator>(1024, 100000);
   std::cout << "  Estimate:    " << estimate << std::endl;
 }
