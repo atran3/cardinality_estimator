@@ -1,7 +1,6 @@
 #include "PCSAEstimator.h"
 #include <strings.h>
 #include <math.h>
-#include <iostream>
 
 static const double phi = 0.77351;
 static const unsigned int L = 32;
@@ -32,13 +31,9 @@ double PCSAEstimator::estimate() {
 	unsigned int S = 0;
 	for(unsigned int i = 0; i < numBuckets; i++) {
 		unsigned int R = 0;
-		// while(R < L && ((buckets[i] >> R) & 1)) {
-		// 	R += 1;
-		// }
 		R = rho(~buckets[i]);
 		S += R;
 	}
 	double val = (numBuckets / phi) * pow(2, (double)S / numBuckets);
-	std::cout << val << std::endl;
 	return val;
 }
