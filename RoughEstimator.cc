@@ -8,7 +8,7 @@ RoughEstimator::~RoughEstimator() {
 
 }
 
-void RoughEstimator::read(double elem) {
+void RoughEstimator::read(size_t elem) {
   
 }
 

@@ -8,10 +8,13 @@ public:
   LogLogEstimator(size_t numBuckets);
   ~LogLogEstimator();
 
-  void read(double elem);
+  void read(size_t elem);
   double estimate();
 
 private:
+  char *buckets;
+  size_t numBuckets;
+  size_t k;
 };
 
 #endif

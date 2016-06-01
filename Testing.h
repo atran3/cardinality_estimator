@@ -7,14 +7,14 @@
 static const size_t kRandomSeed = 1337;
 
 template <typename E>
-double runTest(size_t buckets, size_t numElements, size_t universeSize) {
+double runTest(size_t buckets, size_t numElements) {
   E estimator(buckets);
   std::default_random_engine engine;
   engine.seed(kRandomSeed);
-  auto gen = std::uniform_real_distribution<double>(0, universeSize);
+  auto gen = std::uniform_int_distribution<int>(0, UINT_MAX);
 
   for (size_t i = 0; i < numElements; ++i) {
-    double val = gen(engine);
+    size_t val = gen(engine);
     estimator.read(val);
   }
 
@@ -23,11 +23,11 @@ double runTest(size_t buckets, size_t numElements, size_t universeSize) {
 
 template <typename E>
 double runAggregatedTest(size_t buckets, size_t numElements,
-			 size_t universeSize, size_t numEstimators,
+			 size_t numEstimators,
 			 std::function<double (double *, int)> combiner) {
   double* estimates = (double *) malloc(numEstimators * sizeof(double));
   for (size_t i = 0; i < numEstimators; ++i) {
-    estimates[i] = runTest<E>(buckets, numElements, universeSize);    
+    estimates[i] = runTest<E>(buckets, numElements);    
   }
 
   double result = combiner(estimates, numEstimators);

@@ -9,13 +9,13 @@ public:
   PCSAEstimator(size_t numBuckets);
   ~PCSAEstimator();
 
-  void read(double elem);
+  void read(size_t elem);
   double estimate();
 
 private:
 	unsigned int* buckets;
 	size_t numBuckets;
-	std::hash<double> h;
+	std::hash<size_t> h;
 
 	unsigned int rho(unsigned int y);
 };

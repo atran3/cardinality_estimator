@@ -8,7 +8,7 @@ public:
   RoughEstimator(size_t numBuckets);
   ~RoughEstimator();
 
-  void read(double elem);
+  void read(size_t elem);
   double estimate();
 
 private:

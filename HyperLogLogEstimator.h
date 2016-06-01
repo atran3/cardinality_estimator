@@ -8,7 +8,7 @@ public:
   HyperLogLogEstimator(size_t numBuckets);
   ~HyperLogLogEstimator();
 
-  void read(double elem);
+  void read(size_t elem);
   double estimate();
 
 private:

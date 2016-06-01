@@ -15,7 +15,7 @@ PCSAEstimator::~PCSAEstimator() {
 	delete[] buckets;
 }
 
-void PCSAEstimator::read(double elem) {
+void PCSAEstimator::read(size_t elem) {
 	unsigned int hash = h(elem);
 	unsigned int alpha = hash % numBuckets;
 	unsigned int index = rho(hash / numBuckets);

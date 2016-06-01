@@ -8,7 +8,7 @@ HyperLogLogEstimator::~HyperLogLogEstimator() {
 
 }
 
-void HyperLogLogEstimator::read(double elem) {
+void HyperLogLogEstimator::read(size_t elem) {
   
 }
 

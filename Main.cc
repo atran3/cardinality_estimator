@@ -8,8 +8,8 @@
 
 int main() {
   std::cout << "Practice Test with PCSA Estimator..." << std::endl;
-  double estimate = runTest<PCSAEstimator>(128, 100000, 1);
-  std::cout << "  Test:    " << ((estimate == 1.0) ? "passed" : "failed") << std::endl;
+  double estimate = runTest<LogLogEstimator>(1024, 100000);
+  std::cout << "  Estimate:    " << estimate << std::endl;
 }
 
 double mean(double* estimates, int numEstimators) {
