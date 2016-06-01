@@ -3,6 +3,7 @@
 
 #include "stdlib.h"
 #include <functional>
+#include "Hashes.h"
 
 class HyperLogLogEstimator {
 public:
@@ -16,7 +17,7 @@ private:
   char *buckets;
   size_t numBuckets;
   size_t k;
-  std::hash<size_t> h;
+  HashFunction h;
 };
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "stdlib.h"
 #include <functional>
+#include "Hashes.h"
 
 class PCSAEstimator {
 public:
@@ -15,7 +16,7 @@ public:
 private:
 	unsigned int* buckets;
 	size_t numBuckets;
-	std::hash<size_t> h;
+	HashFunction h;
 
 	unsigned int rho(unsigned int y);
 };

@@ -2,6 +2,7 @@
 #define LogLog_Included
 
 #include "stdlib.h"
+#include "Hashes.h"
 
 class LogLogEstimator {
 public:
@@ -15,6 +16,7 @@ private:
   char *buckets;
   size_t numBuckets;
   size_t k;
+  HashFunction h;
 };
 
 #endif

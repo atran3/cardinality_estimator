@@ -4,11 +4,14 @@
 #include "PCSAEstimator.h"
 #include "LogLogEstimator.h"
 #include "HyperLogLogEstimator.h"
-#include "RoughEstimator.h"
+#include "OptimalEstimator.h"
 #include <fstream>
+#include <string>
+#include <math.h>
 
 void runBucketCardinalityTest();
 void runStreamUniverseTest();
+void runMemoryTest(size_t exp);
 
 int main() {
   size_t numBuckets = 1024;
@@ -26,12 +29,12 @@ int main() {
   std::cout << " HLgLg:    " << runFixedTest<HyperLogLogEstimator>(numBuckets, numElements, stddev, NULL) << std::endl;
   std::cout << std::endl << "=======================================" << std::endl;
   //runBucketCardinalityTest();
-  runStreamUniverseTest();
+  //runStreamUniverseTest();
+  runMemoryTest(7);
 }
 
 void runBucketCardinalityTest() {
-  kAllUnique= false;
-  kUniformDist = true;
+  kAllUnique = true;
   kTrackGold = false;
 
   std::ofstream pcsa, ll, hll;
@@ -48,7 +51,7 @@ void runBucketCardinalityTest() {
       double e_ll = runFixedTest<LogLogEstimator>(numBuckets, numElements, 0, NULL);
       double e_hll = runFixedTest<HyperLogLogEstimator>(numBuckets, numElements, 0, NULL);
 
-      std::cout << gold << "(" << numBuckets << ") " << e_pcsa << " " << e_ll << " " << e_hll << std::endl;
+      //std::cout << gold << "(" << numBuckets << ") " << e_pcsa << " " << e_ll << " " << e_hll << std::endl;
 
       pcsa << numElements << "\t" << numBuckets << "\t" << (std::abs(e_pcsa-gold)/gold) << "\n";
       ll << numElements << "\t" << numBuckets << "\t" << (std::abs(e_ll-gold)/gold) << "\n";
@@ -94,7 +97,36 @@ void runStreamUniverseTest() {
   kUniverseSize = UINT_MAX;
 }
 
+void runMemoryTest(size_t exp) {
+  kAllUnique = false;
+  kUniformDist = true;
+  kTrackGold = true;
 
+  std::ofstream pcsa, ll, hll;
+  pcsa.open("mt_pcsa_e" + std::to_string(exp) + ".tab");
+  ll.open("mt_ll_e" + std::to_string(exp) + ".tab");
+  hll.open("mt_hll_e" + std::to_string(exp) + ".tab");
+
+  size_t numElements = pow(10, exp);
+  std::cout << "Running MemoryTest (" << numElements << " elements)..." << std::endl;
+  for (size_t numHllBuckets = 32; numHllBuckets <= 2048; numHllBuckets *= 2) {
+    size_t gold = 0;
+    size_t bytes = numHllBuckets*5/8;
+    double e_pcsa = runFixedTest<PCSAEstimator>(bytes/4, numElements, 0, &gold);
+    double e_ll = runFixedTest<LogLogEstimator>(numHllBuckets, numElements, 0, NULL);
+    double e_hll = runFixedTest<HyperLogLogEstimator>(numHllBuckets, numElements, 0, NULL);
+
+    std::cout << bytes << "(" << numHllBuckets << ") " << e_pcsa << " " << e_ll << " " << e_hll << std::endl;
+
+    pcsa << bytes << "\t" << (std::abs(e_pcsa-gold)/gold) << "\n";
+    ll << bytes << "\t" << (std::abs(e_ll-gold)/gold) << "\n";
+    hll << bytes << "\t" << (std::abs(e_hll-gold)/gold) << "\n";
+  }
+
+  pcsa.close();
+  ll.close();
+  hll.close();
+}
 
 double mean(double* estimates, int numEstimators) {
   double total = 0;

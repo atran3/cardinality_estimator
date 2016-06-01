@@ -1,5 +1,6 @@
 #include "HyperLogLogEstimator.h"
 #include <math.h>
+#include <iostream>
 
 static const double alpha = 0.72134;
 
@@ -9,6 +10,7 @@ HyperLogLogEstimator::HyperLogLogEstimator(size_t numBuckets) {
   // We will simulate using only 5 of 8 bits
   buckets = new char[numBuckets]();
   k = (size_t) log2(numBuckets);
+  h = fiveIndependentHashFamily()->get();
 }
 
 HyperLogLogEstimator::~HyperLogLogEstimator() {
@@ -18,13 +20,13 @@ HyperLogLogEstimator::~HyperLogLogEstimator() {
 void HyperLogLogEstimator::read(size_t elem) {
   size_t hash = h(elem);
   size_t index = 1 + hash & ((1 << k) - 1);
-  size_t val = ffs(elem >> k);
+  size_t val = ffs(hash >> k);
 
   if (val == 0)
     return;
 
   // 5 bit limit
-  val = val & 31;
+  val = (val) & 31;
 
   if (val > buckets[index]) {
     buckets[index] = val;

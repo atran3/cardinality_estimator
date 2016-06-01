@@ -1,7 +1,6 @@
 #include "LogLogEstimator.h"
 #include <math.h>
 #include <strings.h>
-#include <iostream>
 
 LogLogEstimator::LogLogEstimator(size_t numBuckets) {
   this->numBuckets = numBuckets;
@@ -9,6 +8,7 @@ LogLogEstimator::LogLogEstimator(size_t numBuckets) {
   // We will simulate using only 5 of 8 bits
   buckets = new char[numBuckets]();
   k = (size_t) log2(numBuckets);
+  h = threeIndependentHashFamily()->get();
 }
 
 LogLogEstimator::~LogLogEstimator() {
@@ -17,8 +17,9 @@ LogLogEstimator::~LogLogEstimator() {
 
 void LogLogEstimator::read(size_t elem) {
   // Hard coded 32 bits for size_t
-  size_t index = elem & ((1 << k) - 1);
-  size_t val = ffs(elem >> k);
+  size_t newElem = h(elem);
+  size_t index = newElem & ((1 << k) - 1);
+  size_t val = ffs(newElem >> k);
   
   if (val == 0)
     return;

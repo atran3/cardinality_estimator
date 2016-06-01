@@ -9,6 +9,7 @@ PCSAEstimator::PCSAEstimator(size_t numBuckets) {
 	this->numBuckets = numBuckets;
 	//assumes each bitmap is sizeof(int) * 8
 	buckets = new unsigned int[numBuckets](); 
+	h = threeIndependentHashFamily()->get();
 }
 
 PCSAEstimator::~PCSAEstimator() {
