@@ -30,10 +30,7 @@ unsigned int PCSAEstimator::rho(unsigned int y) {
 double PCSAEstimator::estimate() {
 	unsigned int S = 0;
 	for(unsigned int i = 0; i < numBuckets; i++) {
-		unsigned int R = 0;
-		R = rho(~buckets[i]);
-		S += R;
+		S += rho(~buckets[i]);
 	}
-	double val = (numBuckets / phi) * pow(2, (double)S / numBuckets);
-	return val;
+	return (numBuckets / phi) * pow(2, (double)S / numBuckets);
 }
