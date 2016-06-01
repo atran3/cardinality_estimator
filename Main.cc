@@ -8,7 +8,7 @@
 
 int main() {
   std::cout << "Practice Test with PCSA Estimator..." << std::endl;
-  double estimate = runTest<PCSAEstimator>(1, 1, 1);
+  double estimate = runTest<PCSAEstimator>(128, 100000, 1);
   std::cout << "  Test:    " << ((estimate == 1.0) ? "passed" : "failed") << std::endl;
 }
 

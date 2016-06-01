@@ -11,10 +11,10 @@ double runTest(size_t buckets, size_t numElements, size_t universeSize) {
   E estimator(buckets);
   std::default_random_engine engine;
   engine.seed(kRandomSeed);
-  auto gen = std::uniform_int_distribution<int>(0, universeSize);
+  auto gen = std::uniform_real_distribution<double>(0, universeSize);
 
   for (size_t i = 0; i < numElements; ++i) {
-    int val = gen(engine);
+    double val = gen(engine);
     estimator.read(val);
   }
 
