@@ -1,6 +1,8 @@
 #include "HyperLogLogEstimator.h"
 #include <math.h>
 
+static const double alpha = 0.72134;
+
 HyperLogLogEstimator::HyperLogLogEstimator(size_t numBuckets) {
   this->numBuckets = numBuckets;
   // Each bitmap is 5 bits by construction
@@ -22,7 +24,7 @@ void HyperLogLogEstimator::read(size_t elem) {
     return;
 
   // 5 bit limit
-  val = (val-1) & 31;
+  val = val & 31;
 
   if (val > buckets[index]) {
     buckets[index] = val;
@@ -37,8 +39,5 @@ double HyperLogLogEstimator::estimate() {
   
   indicator = 1.0/indicator;
 
-  double temp = 0.0;
-  double constant = temp;
-   
-  return constant * indicator * numBuckets * numBuckets;
+  return alpha * indicator * numBuckets * numBuckets;
 }

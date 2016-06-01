@@ -24,6 +24,7 @@ void LogLogEstimator::read(size_t elem) {
     return;
 
   // 5 bit limit
+  // Subtract 1 because using the rank starting at 0
   val = (val-1) & 31;
 
   if (val > buckets[index]) {

@@ -5,12 +5,96 @@
 #include "LogLogEstimator.h"
 #include "HyperLogLogEstimator.h"
 #include "RoughEstimator.h"
+#include <fstream>
+
+void runBucketCardinalityTest();
+void runStreamUniverseTest();
 
 int main() {
-  std::cout << "Practice Test..." << std::endl;
-  double estimate = runTest<LogLogEstimator>(1024, 100000);
-  std::cout << "  Estimate:    " << estimate << std::endl;
+  size_t numBuckets = 1024;
+  size_t numElements = 10000;
+  size_t stddev = 100;
+
+  kAllUnique = false;
+  kUniformDist = true;
+  kTrackGold = false;
+  size_t gold = 0;
+  std::cout << "Practice Tests with " << numBuckets << " buckets and " \
+	    << numElements << " elements..." << std::endl;
+  std::cout << "  PCSA:    " << runFixedTest<PCSAEstimator>(numBuckets, numElements, stddev, &gold) << std::endl;
+  std::cout << "  LgLg:    " << runFixedTest<LogLogEstimator>(numBuckets, numElements, stddev, NULL) << std::endl;
+  std::cout << " HLgLg:    " << runFixedTest<HyperLogLogEstimator>(numBuckets, numElements, stddev, NULL) << std::endl;
+  std::cout << std::endl << "=======================================" << std::endl;
+  //runBucketCardinalityTest();
+  runStreamUniverseTest();
 }
+
+void runBucketCardinalityTest() {
+  kAllUnique= false;
+  kUniformDist = true;
+  kTrackGold = false;
+
+  std::ofstream pcsa, ll, hll;
+  pcsa.open("bct_pcsa.tab");
+  ll.open("bct_ll.tab");
+  hll.open("bct_hll.tab");
+
+  std::cout << "Running BucketCardinalityTest..." << std::endl;
+  for (size_t numElements = 100; numElements <= 1000000000; numElements *= 10) {
+    std::cout << "  iterating over bucket sizes for " << numElements << " elements..." << std::endl;;
+    for (size_t numBuckets = 2; numBuckets <= 2048; numBuckets *= 2) {
+      size_t gold = numElements;
+      double e_pcsa = runFixedTest<PCSAEstimator>(numBuckets, numElements, 0, NULL);
+      double e_ll = runFixedTest<LogLogEstimator>(numBuckets, numElements, 0, NULL);
+      double e_hll = runFixedTest<HyperLogLogEstimator>(numBuckets, numElements, 0, NULL);
+
+      std::cout << gold << "(" << numBuckets << ") " << e_pcsa << " " << e_ll << " " << e_hll << std::endl;
+
+      pcsa << numElements << "\t" << numBuckets << "\t" << (std::abs(e_pcsa-gold)/gold) << "\n";
+      ll << numElements << "\t" << numBuckets << "\t" << (std::abs(e_ll-gold)/gold) << "\n";
+      hll << numElements << "\t" << numBuckets << "\t" << (std::abs(e_hll-gold)/gold) << "\n";
+    }
+  }
+
+  pcsa.close();
+  ll.close();
+  hll.close();
+}
+
+void runStreamUniverseTest() {
+  kAllUnique = false;
+  kUniformDist = true;
+  kTrackGold = true;
+
+  std::ofstream pcsa, ll, hll;
+  pcsa.open("sut_pcsa.tab");
+  ll.open("sut_ll.tab");
+  hll.open("sut_hll.tab");
+
+  size_t numBuckets = 1024;
+  size_t numElements = 10000;
+  std::cout << "Running StreamUniverseTest..." << std::endl;
+  for (size_t universeSize = 100; universeSize < 100000000000; universeSize *= 10) {
+    kUniverseSize = universeSize;
+    size_t gold = 0;
+    double e_pcsa = runFixedTest<PCSAEstimator>(numBuckets, numElements, 0, &gold);
+    double e_ll = runFixedTest<LogLogEstimator>(numBuckets, numElements, 0, NULL);
+    double e_hll = runFixedTest<HyperLogLogEstimator>(numBuckets, numElements, 0, NULL);
+
+    double ratio = ((double)numElements)/universeSize;
+    pcsa << ratio << "\t" << (std::abs(e_pcsa-gold)/gold) << "\n";
+    ll << ratio << "\t" << (std::abs(e_ll-gold)/gold) << "\n";
+    hll << ratio << "\t" << (std::abs(e_hll-gold)/gold) << "\n";
+  }
+
+  pcsa.close();
+  ll.close();
+  hll.close();
+
+  kUniverseSize = UINT_MAX;
+}
+
+
 
 double mean(double* estimates, int numEstimators) {
   double total = 0;
