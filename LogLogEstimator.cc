@@ -1,7 +1,6 @@
 #include "LogLogEstimator.h"
 #include <math.h>
 #include <strings.h>
-#include <iostream>
 
 LogLogEstimator::LogLogEstimator(size_t numBuckets) {
   this->numBuckets = numBuckets;

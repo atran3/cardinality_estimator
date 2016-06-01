@@ -4,11 +4,11 @@
 #include "PCSAEstimator.h"
 #include "LogLogEstimator.h"
 #include "HyperLogLogEstimator.h"
-#include "RoughEstimator.h"
+#include "OptimalEstimator.h"
 
 int main() {
   std::cout << "Practice Test..." << std::endl;
-  double estimate = runTest<LogLogEstimator>(1024, 100000);
+  double estimate = runTest<OptimalEstimator>(256, 100000);
   std::cout << "  Estimate:    " << estimate << std::endl;
 }
 
