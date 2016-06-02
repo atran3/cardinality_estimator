@@ -6,7 +6,7 @@
 #include <chrono>
 #include <set>
 
-static const size_t kRandomSeed = 137;
+static const size_t kRandomSeed = 1337;
 static size_t kUniverseSize = UINT_MAX;
 static bool kAllUnique = false;
 static bool kUniformDist = true;
@@ -64,7 +64,7 @@ double runAggregatedTest(size_t buckets, size_t numElements,
 			 std::function<double (double *, int)> combiner) {
   double* estimates = (double *) malloc(numEstimators * sizeof(double));
   for (size_t i = 0; i < numEstimators; ++i) {
-    estimates[i] = runRandomTest<E>(buckets, numElements, stddev, gold);    
+    estimates[i] = runFixedTest<E>(buckets, numElements, stddev, gold);    
   }
 
   double result = combiner(estimates, numEstimators);

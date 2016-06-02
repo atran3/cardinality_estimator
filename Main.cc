@@ -8,16 +8,35 @@
 #include <fstream>
 #include <string>
 #include <math.h>
+#include <functional>
+
+double mean(double* estimates, int numEstimators) {
+  double total = 0;
+  for (size_t i = 0; i < numEstimators; ++i) {
+    total += estimates[i];
+  }
+  return total/numEstimators;
+}
+
+double median(double* estimates, int numEstimators) {
+  std::sort(estimates, estimates + numEstimators);
+  if (numEstimators % 2) {
+    return estimates[numEstimators/2];
+  } else {
+    return (estimates[numEstimators/2] + estimates[(numEstimators/2)-1])/2;
+  }
+}
 
 void runBucketCardinalityTest();
 void runStreamUniverseTest();
 void runMemoryTest(size_t exp);
+void runAggregationTests(bool useMean);
 
 int main() {
   size_t numBuckets = 1024;
   size_t numElements = 10000;
   size_t stddev = 100;
-
+  
   kAllUnique = false;
   kUniformDist = true;
   kTrackGold = false;
@@ -30,7 +49,8 @@ int main() {
   std::cout << std::endl << "=======================================" << std::endl;
   //runBucketCardinalityTest();
   //runStreamUniverseTest();
-  runMemoryTest(7);
+  //runMemoryTest(7);
+  runAggregationTests(false);
 }
 
 void runBucketCardinalityTest() {
@@ -128,19 +148,44 @@ void runMemoryTest(size_t exp) {
   hll.close();
 }
 
-double mean(double* estimates, int numEstimators) {
-  double total = 0;
-  for (size_t i = 0; i < numEstimators; ++i) {
-    total += estimates[i];
-  }
-  return total/numEstimators;
-}
+void runAggregationTests(bool useMean) {
+  kAllUnique = false;
+  kUniformDist = true;
+  kTrackGold = true;
 
-double median(double* estimates, int numEstimators) {
-  std::sort(estimates, estimates + numEstimators);
-  if (numEstimators % 2) {
-    return estimates[numEstimators/2];
+  std::function<double (double*, int)> combiner;
+  if (useMean) {
+    combiner = mean;
   } else {
-    return (estimates[numEstimators/2] + estimates[(numEstimators/2)-1])/2;
+    combiner = median;
   }
+
+  std::ofstream pcsa, ll, hll;
+  std::string extension = useMean? "mean" : "median";
+  pcsa.open("at_pcsa_" + extension + ".tab");
+  ll.open("at_ll_" + extension + ".tab");
+  hll.open("at_hll_" + extension + ".tab");
+
+  size_t numBuckets = 1024;
+  size_t numElements = 100000;
+  std::cout << "Running Aggregation Tests (" << extension << " on " << numElements << " elements)..." << std::endl;
+  for (size_t numEstimators = 1; numEstimators <= 128; numEstimators *= 2) {
+    size_t gold = 0;
+    double e_pcsa = runAggregatedTest<PCSAEstimator>(numBuckets, numElements,
+						     numEstimators, 0, &gold, combiner);
+    double e_ll = runAggregatedTest<LogLogEstimator>(numBuckets, numElements,
+						     numEstimators, 0, NULL, combiner);
+    double e_hll = runAggregatedTest<HyperLogLogEstimator>(numBuckets, numElements,
+							   numEstimators, 0, NULL, combiner);
+
+    std::cout << numEstimators << " " << e_pcsa << " " << e_ll << " " << e_hll << std::endl;
+
+    pcsa << numEstimators << "\t" << (std::abs(e_pcsa-gold)/gold) << "\n";
+    ll << numEstimators << "\t" << (std::abs(e_ll-gold)/gold) << "\n";
+    hll << numEstimators << "\t" << (std::abs(e_hll-gold)/gold) << "\n";
+  }
+
+  pcsa.close();
+  ll.close();
+  hll.close();
 }
